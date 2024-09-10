@@ -1,0 +1,99 @@
+[package]
+name = "fh_kiel_ical_splitter"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70.0"
+license = "Unlicense"
+
+[dependencies]
+color-eyre = "0.6.3"
+ical = { version = "0.11.0", features = ["ical", "generator"] }
+regex = "1.10.6"
+reqwest = { version = "0.12.7", features = [
+    "blocking",
+    "brotli",
+    "deflate",
+    "gzip",
+    "json",
+    "rustls-tls",
+] }
+tokio = { version = "1.40.0", features = ["full"] }
+tracing-subscriber = "0.3.18"
+tracing-error = "0.2.0"
+tracing = "0.1.40"
+thiserror = "1.0.63"
+once_cell = "1.19.0"
+chrono = "0.4.38"
+
+[profile.release]
+codegen-units = 1
+strip = "symbols"
+lto = "fat"
+
+# Enable high optimizations for dependencies but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
+[features]
+github_pages = []
+
+# Configure lints
+[lints.rust]
+#unknown_lints = "warn"
+non_ascii_idents = "deny"
+
+[lints.clippy]
+# Allowed lints
+missing_errors_doc = "allow"
+
+# Enable clippy lint groups
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+
+# Enable specific clippy restriction lints
+allow_attributes = "warn"
+as_underscore = "warn"
+dbg_macro = "warn"
+empty_drop = "warn"
+empty_enum_variants_with_brackets = "warn"
+empty_structs_with_brackets = "warn"
+format_push_string = "warn"
+if_then_some_else_none = "warn"
+impl_trait_in_params = "warn"
+indexing_slicing = "warn"
+infinite_loop = "warn"
+let_underscore_must_use = "warn"
+mem_forget = "warn"
+missing_asserts_for_indexing = "warn"
+multiple_inherent_impl = "warn"
+needless_raw_strings = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+redundant_type_annotations = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+str_to_string = "warn"
+string_lit_chars_any = "warn"
+string_to_string = "warn"
+try_err = "warn"
+undocumented_unsafe_blocks = "warn"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+unnecessary_self_imports = "warn"
+use_debug = "warn"
+verbose_file_reads = "warn"
+wildcard_enum_match_arm = "warn"
+
+# Denied clippy lints
+exit = "deny"
+expect_used = "deny"
+get_unwrap = "deny"
+missing_assert_message = "deny"
+multiple_unsafe_ops_per_block = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+ref_patterns = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+unwrap_in_result = "deny"
+unwrap_used = "deny"

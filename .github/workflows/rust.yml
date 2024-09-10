@@ -1,0 +1,113 @@
+name: Rust
+
+on:
+  pull_request:
+    branches: ["*"]
+    paths:
+      # Workflow file itself
+      - '.github/workflows/rust.yml'
+      # Rust files
+      - '**.rs'
+      # Cargo files
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+  push:
+    branches: ["main", "develop"]
+    paths:
+      # Workflow file itself
+      - '.github/workflows/rust.yml'
+      # Rust files
+      - '**.rs'
+      # Cargo files
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+  workflow_dispatch:
+
+concurrency:
+  # Documentation suggests ${{ github.head_ref }}, but that's only available on pull_request/pull_request_target triggers, so using ${{ github.ref }}.
+  # On main, we want all builds to complete even if merging happens faster to make it easier to discover at which point something broke.
+  group: ${{ github.ref == 'refs/heads/main' && format('ci-main-{0}', github.sha) || format('ci-{0}', github.ref) }}-${{github.workflow }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        components: clippy
+
+    - name: Install cargo-hack
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-hack
+
+    - name: Clippy
+      run: cargo hack clippy --feature-powerset --verbose -- -D warnings
+
+  formatting:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        components: rustfmt
+
+    - name: Rustfmt Check
+      uses: actions-rust-lang/rustfmt@v1
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        toolchain:
+          - "nightly"
+          - "stable"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: ${{ matrix.toolchain }}
+
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-hack
+
+    - name: Run tests
+      run: cargo hack test --feature-powerset --verbose
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Build documentation
+      env:
+        RUSTDOCFLAGS: -D warnings
+      run: cargo doc --workspace --all-features --no-deps --document-private-items
