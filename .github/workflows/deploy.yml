@@ -33,7 +33,7 @@ jobs:
         mv files      dist
     
     - name: Upload artifacts
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: ./dist
 
