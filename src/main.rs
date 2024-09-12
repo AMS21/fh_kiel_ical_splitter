@@ -90,7 +90,6 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
     Ok(response_body)
 }
 
-#[allow(clippy::unwrap_used)]
 fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
     // Sample link: /files/iue/WiSe_2425/semester_1/1_Sem_Elektrotechnik_Gruppe_1.ics
     static URL_COMPONENTS_EXTRACT_REGEX: Lazy<Regex> =
@@ -109,7 +108,6 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 
 fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
     // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast" style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik und Elektrotechnik </a>
-    #[allow(clippy::unwrap_used)]
     static DEPARTMENT_LINK_REGEX: Lazy<Regex> =
         Lazy::new(|| Regex::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"").unwrap());
 
@@ -125,7 +123,6 @@ fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
     links
 }
 
-#[allow(clippy::unwrap_used)]
 fn is_event_already_present(new_event: &IcalEvent, events: &Vec<IcalEvent>) -> bool {
     let new_event_start = new_event
         .properties
@@ -236,42 +233,47 @@ fn main() -> Result<()> {
                         number_of_found_calendars += 1;
 
                         // Iterate through all events of that calendar
-                        for event in calendar.events {
+                        for mut event in calendar.events {
                             // Find summary
-                            let summary = event
+                            let summary_property = event
                                 .properties
-                                .iter()
+                                .iter_mut()
                                 .find(|p| p.name == PROPERTY_NAME_SUMMARY)
-                                .map(|p| p.value.clone());
+                                .unwrap();
 
-                            if let Some(Some(name)) = summary {
-                                // Ignore festive days
-                                if name.contains("Feiertag") {
-                                    continue;
-                                }
+                            // Extract name and clean it up
+                            summary_property.value = summary_property
+                                .value
+                                .as_mut()
+                                .map(|s| s.replace("- ", "").replace("  ", " "));
 
-                                // Append to map
-                                if let std::collections::btree_map::Entry::Vacant(e) =
-                                    map.entry(name.clone())
-                                {
-                                    // Create new map entry for this course
-                                    e.insert(CalendarEntry {
-                                        events: vec![event],
-                                        department: department.clone(),
-                                        year: year.clone(),
-                                        institute: institute.clone(),
-                                    });
-                                } else if let Some(calendar_entry) = map.get_mut(&name) {
-                                    // Don't add any duplicate events
-                                    if !is_event_already_present(&event, &calendar_entry.events) {
-                                        calendar_entry.events.push(event);
-                                    }
-                                }
+                            let name = summary_property.value.as_ref().unwrap();
 
-                                total_number_of_events += 1;
-                            } else {
-                                error!("Calendar event is missing summary");
+                            // Ignore festive days and other events
+                            if name.contains("Feiertag") || name.contains("Markt der Möglichkeiten")
+                            {
+                                continue;
                             }
+
+                            // Append to map
+                            if let std::collections::btree_map::Entry::Vacant(e) =
+                                map.entry(name.clone())
+                            {
+                                // Create new map entry for this course
+                                e.insert(CalendarEntry {
+                                    events: vec![event],
+                                    department: department.clone(),
+                                    year: year.clone(),
+                                    institute: institute.clone(),
+                                });
+                            } else if let Some(calendar_entry) = map.get_mut(name) {
+                                // Don't add any duplicate events
+                                if !is_event_already_present(&event, &calendar_entry.events) {
+                                    calendar_entry.events.push(event);
+                                }
+                            }
+
+                            total_number_of_events += 1;
                         }
                     }
                     Err(err) => {
