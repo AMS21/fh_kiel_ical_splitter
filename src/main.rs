@@ -337,7 +337,11 @@ fn main() -> Result<()> {
         std::fs::create_dir_all(&directory_path)?;
 
         // Write to file
-        let file_name = format!("{}/{}.ics", directory_path, module.replace('/', "_"));
+        let file_name = format!(
+            "{}/{}.ics",
+            directory_path,
+            module.replace(['/', ' ', '-'], "_")
+        );
         std::fs::write(&file_name, calendar.generate())?;
 
         // Create link in html file
