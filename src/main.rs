@@ -4,6 +4,7 @@ mod prelude;
 use crate::prelude::*;
 use ical::generator::Emitter;
 use ical::generator::IcalCalendarBuilder;
+use ical::parser::ical::component::IcalEvent;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use regex::RegexBuilder;
@@ -28,7 +29,7 @@ const MAX_RETRIES: usize = 10;
 
 #[derive(Debug)]
 struct CalendarEntry {
-    pub events: Vec<ical::parser::ical::component::IcalEvent>,
+    pub events: Vec<IcalEvent>,
     pub department: String,
     pub year: String,
     pub institute: String,
@@ -124,7 +125,50 @@ fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
     links
 }
 
-const SUMMARY_PROPERTY_NAME: &str = "SUMMARY";
+#[allow(clippy::unwrap_used)]
+fn is_event_already_present(new_event: &IcalEvent, events: &Vec<IcalEvent>) -> bool {
+    let new_event_start = new_event
+        .properties
+        .iter()
+        .find(|p| p.name == PROPERTY_NAME_DTSTART)
+        .map(|p| p.value.clone())
+        .unwrap()
+        .unwrap();
+    let new_event_end = new_event
+        .properties
+        .iter()
+        .find(|p| p.name == PROPERTY_NAME_DTEND)
+        .map(|p| p.value.clone())
+        .unwrap()
+        .unwrap();
+
+    for event in events {
+        let event_start = event
+            .properties
+            .iter()
+            .find(|p| p.name == PROPERTY_NAME_DTSTART)
+            .map(|p| p.value.clone())
+            .unwrap()
+            .unwrap();
+        let event_end = new_event
+            .properties
+            .iter()
+            .find(|p| p.name == PROPERTY_NAME_DTEND)
+            .map(|p| p.value.clone())
+            .unwrap()
+            .unwrap();
+
+        if new_event_start == event_start && new_event_end == event_end {
+            return true;
+        }
+    }
+
+    false
+}
+
+const PROPERTY_NAME_SUMMARY: &str = "SUMMARY";
+const PROPERTY_NAME_DTSTART: &str = "DTSTART";
+const PROPERTY_NAME_DTEND: &str = "DTEND";
 
 #[allow(clippy::too_many_lines)]
 fn main() -> Result<()> {
@@ -197,7 +241,7 @@ fn main() -> Result<()> {
                             let summary = event
                                 .properties
                                 .iter()
-                                .find(|p| p.name == SUMMARY_PROPERTY_NAME)
+                                .find(|p| p.name == PROPERTY_NAME_SUMMARY)
                                 .map(|p| p.value.clone());
 
                             if let Some(Some(name)) = summary {
@@ -218,7 +262,10 @@ fn main() -> Result<()> {
                                         institute: institute.clone(),
                                     });
                                 } else if let Some(calendar_entry) = map.get_mut(&name) {
-                                    calendar_entry.events.push(event);
+                                    // Don't add any duplicate events
+                                    if !is_event_already_present(&event, &calendar_entry.events) {
+                                        calendar_entry.events.push(event);
+                                    }
                                 }
 
                                 total_number_of_events += 1;
