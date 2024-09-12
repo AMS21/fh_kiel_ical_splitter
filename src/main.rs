@@ -92,8 +92,12 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
 
 fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
     // Sample link: /files/iue/WiSe_2425/semester_1/1_Sem_Elektrotechnik_Gruppe_1.ics
-    static URL_COMPONENTS_EXTRACT_REGEX: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"/files/(.*?)/(.*?)/(.*?)/.*?\.ics").unwrap());
+    static URL_COMPONENTS_EXTRACT_REGEX: Lazy<Regex> = Lazy::new(|| {
+        RegexBuilder::new(r"/files/(.*?)/(.*?)/(.*?)/.*?\.ics")
+            .case_insensitive(true)
+            .build()
+            .unwrap()
+    });
 
     let captures = URL_COMPONENTS_EXTRACT_REGEX
         .captures(url)
@@ -108,8 +112,12 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 
 fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
     // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast" style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik und Elektrotechnik </a>
-    static DEPARTMENT_LINK_REGEX: Lazy<Regex> =
-        Lazy::new(|| Regex::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"").unwrap());
+    static DEPARTMENT_LINK_REGEX: Lazy<Regex> = Lazy::new(|| {
+        RegexBuilder::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"")
+            .case_insensitive(true)
+            .build()
+            .unwrap()
+    });
 
     let mut links = vec![];
 
