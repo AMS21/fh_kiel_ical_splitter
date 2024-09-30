@@ -8,7 +8,7 @@ license = "Unlicense"
 [dependencies]
 color-eyre = "0.6.3"
 ical = { version = "0.11.0", features = ["ical", "generator"] }
-regex = "1.10.6"
+regex = "1.11.0"
 reqwest = { version = "0.12.7", features = [
     "blocking",
     "brotli",
