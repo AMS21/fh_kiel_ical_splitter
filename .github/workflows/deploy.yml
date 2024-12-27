@@ -25,10 +25,10 @@ jobs:
 
     - name: Install rust toolchain
       uses: actions-rust-lang/setup-rust-toolchain@v1
-    
+
     - name: Build
       run: cargo build --release --features "github_pages"
-    
+
     - name: Build website
       run: |
         cargo run --release --features "github_pages"
@@ -37,7 +37,7 @@ jobs:
         mkdir -p      dist
         mv index.html dist
         mv files      dist
-    
+
     - name: Upload artifacts
       uses: actions/upload-pages-artifact@v3
       with:
