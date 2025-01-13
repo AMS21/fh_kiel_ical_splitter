@@ -30,7 +30,7 @@ tracing = { version = "0.1.41", features = [
     "max_level_trace",
     "release_max_level_info",
 ], default-features = false }
-thiserror = { version = "2.0.10", default-features = false }
+thiserror = { version = "2.0.11", default-features = false }
 once_cell = { version = "1.20.2", features = ["std"], default-features = false }
 chrono = { version = "0.4.39", features = [
     "clock",
