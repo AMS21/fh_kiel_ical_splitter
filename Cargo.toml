@@ -1,8 +1,8 @@
 [package]
 name = "fh_kiel_ical_splitter"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.70.0"
+edition = "2024"
+rust-version = "1.85"
 license = "Unlicense"
 
 [dependencies]
