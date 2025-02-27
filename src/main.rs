@@ -10,6 +10,7 @@ use regex::Regex;
 use regex::RegexBuilder;
 use std::collections::BTreeMap;
 use std::io::Write;
+use tracing::debug;
 
 const CLIENT_USER_AGENT: &str =
     "fh_kiel_ical_splitter/0.1.0 (https://github.com/AMS21/fh_kiel_ical_splitter)";
@@ -257,9 +258,20 @@ fn main() -> Result<()> {
 
                             let name = summary_property.value.as_ref().unwrap();
 
-                            // Ignore festive days and other events
-                            if name.contains("Feiertag") || name.contains("Markt der Möglichkeiten")
+                            // Ignore festive days and other non module related events
+                            if name.contains("Feiertag")
+                                || name.contains("Markt der Möglichkeiten")
+                                || name.contains("Christi Himmelfahrt")
+                                || name.contains("Karfreitag")
+                                || name.contains("Kick-Off-Seminar")
+                                || name.contains("Masterbegrüßung")
+                                || name.contains("Modulvorstellung")
+                                || name.contains("Schwerpunktswahlund")
+                                || name.contains("Ostermontag")
+                                || name.contains("Pfingstmontag")
+                                || name.contains("Vertiefungswahl")
                             {
+                                debug!("Ignoring event: '{name}'");
                                 continue;
                             }
 
