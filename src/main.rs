@@ -176,7 +176,7 @@ const PROPERTY_NAME_SUMMARY: &str = "SUMMARY";
 const PROPERTY_NAME_DTSTART: &str = "DTSTART";
 const PROPERTY_NAME_DTEND: &str = "DTEND";
 
-#[allow(clippy::too_many_lines)]
+#[expect(clippy::too_many_lines)]
 fn main() -> Result<()> {
     // Install color_eyre error handler
     color_eyre::install()?;
