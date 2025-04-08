@@ -5,11 +5,11 @@ use crate::prelude::*;
 use ical::generator::Emitter;
 use ical::generator::IcalCalendarBuilder;
 use ical::parser::ical::component::IcalEvent;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use regex::RegexBuilder;
 use std::collections::BTreeMap;
 use std::io::Write;
+use std::sync::LazyLock;
 use tracing::debug;
 
 const CLIENT_USER_AGENT: &str =
@@ -93,7 +93,7 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
 
 fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
     // Sample link: /files/iue/WiSe_2425/semester_1/1_Sem_Elektrotechnik_Gruppe_1.ics
-    static URL_COMPONENTS_EXTRACT_REGEX: Lazy<Regex> = Lazy::new(|| {
+    static URL_COMPONENTS_EXTRACT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         RegexBuilder::new(r"/files/(.*?)/(.*?)/(.*?)/.*?\.ics")
             .case_insensitive(true)
             .build()
@@ -113,7 +113,7 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 
 fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
     // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast" style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik und Elektrotechnik </a>
-    static DEPARTMENT_LINK_REGEX: Lazy<Regex> = Lazy::new(|| {
+    static DEPARTMENT_LINK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         RegexBuilder::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"")
             .case_insensitive(true)
             .build()
