@@ -178,9 +178,6 @@ const PROPERTY_NAME_DTEND: &str = "DTEND";
 
 #[expect(clippy::too_many_lines)]
 fn main() -> Result<()> {
-    // Install color_eyre error handler
-    color_eyre::install()?;
-
     // Initialize tracing
     let subscriber = tracing_subscriber::FmtSubscriber::new();
     tracing::subscriber::set_global_default(subscriber)?;

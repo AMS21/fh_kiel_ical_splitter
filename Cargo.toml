@@ -6,7 +6,6 @@ rust-version = "1.85"
 license = "Unlicense"
 
 [dependencies]
-color-eyre = { version = "0.6.3", default-features = false }
 ical = { version = "0.11.0", features = [
     "ical",
     "generator",

@@ -14,9 +14,6 @@ pub enum Error {
     IO(#[from] std::io::Error),
 
     #[error(transparent)]
-    ColorEyreReport(#[from] color_eyre::Report),
-
-    #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
 
     #[error(transparent)]
