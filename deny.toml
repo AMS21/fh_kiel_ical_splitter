@@ -91,10 +91,10 @@ ignore = [
 # [possible values: any SPDX 3.11 short identifier (+ optional exception)].
 allow = [
   "Apache-2.0",
+  "CDLA-Permissive-2.0",
   "BSD-3-Clause",
   "ISC",
   "MIT",
-  "MPL-2.0",
   "Unicode-3.0",
   "Unlicense",
 ]
