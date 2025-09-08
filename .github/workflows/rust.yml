@@ -78,6 +78,7 @@ jobs:
         toolchain:
           - "nightly"
           - "stable"
+          - "1.85" # MSRV
 
     steps:
     - name: Checkout
