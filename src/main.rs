@@ -211,7 +211,12 @@ fn main() -> Result<()> {
     for link in &institute_links {
         // Download the institute sub page
         let institute_url = CALENDAR_BASE_URL.to_owned() + link;
-        let institute_page = get_website(&client, &institute_url)?;
+        let Ok(institute_page) = get_website(&client, &institute_url) else {
+            error!(
+                "Failed to download institute page '{institute_url}' after {MAX_RETRIES} retries, skipping"
+            );
+            continue;
+        };
 
         // Iterate through all ics links on the insititutes page
         for (_, [link]) in ics_link_regex
@@ -228,7 +233,10 @@ fn main() -> Result<()> {
 
             // Download the calendar file
             let url = CALENDAR_BASE_URL.to_owned() + link;
-            let ics_file = get_website(&client, &url)?;
+            let Ok(ics_file) = get_website(&client, &url) else {
+                error!("Failed to download ics file '{url}' after {MAX_RETRIES} retries, skipping");
+                continue;
+            };
 
             let ical_reader = ical::IcalParser::new(ics_file.as_bytes());
 
