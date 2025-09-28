@@ -176,6 +176,24 @@ const PROPERTY_NAME_SUMMARY: &str = "SUMMARY";
 const PROPERTY_NAME_DTSTART: &str = "DTSTART";
 const PROPERTY_NAME_DTEND: &str = "DTEND";
 
+const IGNORED_EVENT_NAMES: [&str; 15] = [
+    "Christi Himmelfahrt",
+    "Erstsemester",
+    "Feiertag",
+    "Induction Seminar",
+    "Jobmesse",
+    "Karfreitag",
+    "Kick-off",
+    "Kick-Off",
+    "Markt der Möglichkeiten",
+    "Masterbegrüßung",
+    "Modulvorstellung",
+    "Ostermontag",
+    "Pfingstmontag",
+    "Schwerpunktswahl",
+    "Vertiefungswahl",
+];
+
 #[expect(clippy::too_many_lines)]
 fn main() -> Result<()> {
     // Initialize tracing
@@ -263,19 +281,8 @@ fn main() -> Result<()> {
 
                             let name = summary_property.value.as_ref().unwrap();
 
-                            // Ignore festive days and other non module related events
-                            if name.contains("Feiertag")
-                                || name.contains("Markt der Möglichkeiten")
-                                || name.contains("Christi Himmelfahrt")
-                                || name.contains("Karfreitag")
-                                || name.contains("Kick-Off-Seminar")
-                                || name.contains("Masterbegrüßung")
-                                || name.contains("Modulvorstellung")
-                                || name.contains("Schwerpunktswahlund")
-                                || name.contains("Ostermontag")
-                                || name.contains("Pfingstmontag")
-                                || name.contains("Vertiefungswahl")
-                            {
+                            // Ignore ignored event names
+                            if IGNORED_EVENT_NAMES.binary_search(&name.as_str()).is_ok() {
                                 debug!("Ignoring event: '{name}'");
                                 continue;
                             }
