@@ -1,16 +1,16 @@
 mod error;
 mod prelude;
 
-use crate::prelude::*;
-use ical::generator::Emitter;
-use ical::generator::IcalCalendarBuilder;
-use ical::parser::ical::component::IcalEvent;
-use regex::Regex;
-use regex::RegexBuilder;
-use std::collections::BTreeMap;
-use std::io::Write;
-use std::sync::LazyLock;
+use std::{collections::BTreeMap, io::Write, sync::LazyLock};
+
+use ical::{
+    generator::{Emitter, IcalCalendarBuilder},
+    parser::ical::component::IcalEvent,
+};
+use regex::{Regex, RegexBuilder};
 use tracing::debug;
+
+use crate::prelude::*;
 
 const CLIENT_USER_AGENT: &str =
     "fh_kiel_ical_splitter/0.1.0 (https://github.com/AMS21/fh_kiel_ical_splitter)";
@@ -92,7 +92,8 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
 }
 
 fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
-    // Sample link: /files/iue/WiSe_2425/semester_1/1_Sem_Elektrotechnik_Gruppe_1.ics
+    // Sample link:
+    // /files/iue/WiSe_2425/semester_1/1_Sem_Elektrotechnik_Gruppe_1.ics
     static URL_COMPONENTS_EXTRACT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         RegexBuilder::new(r"/files/(.*?)/(.*?)/(.*?)/.*?\.ics")
             .case_insensitive(true)
@@ -112,7 +113,9 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 }
 
 fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
-    // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast" style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik und Elektrotechnik </a>
+    // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast"
+    // style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik
+    // und Elektrotechnik </a>
     static DEPARTMENT_LINK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         RegexBuilder::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"")
             .case_insensitive(true)
@@ -231,7 +234,8 @@ fn main() -> Result<()> {
         let institute_url = CALENDAR_BASE_URL.to_owned() + link;
         let Ok(institute_page) = get_website(&client, &institute_url) else {
             error!(
-                "Failed to download institute page '{institute_url}' after {MAX_RETRIES} retries, skipping"
+                "Failed to download institute page '{institute_url}' after {MAX_RETRIES} retries, \
+                 skipping"
             );
             continue;
         };
@@ -341,7 +345,8 @@ fn main() -> Result<()> {
 
 <body>
 <h1>Vorlesungspläne der FH-Kiel für jedes Module</h1>
-<h4>Absolut kein Gewähr auf <b>Richtigkeit</b> oder <b>Vollständigkeit</b>. Überprüft vor der Nutzung bitte die offiziellen FH-Kiel-Pläne.</h4>
+<h4>Absolut kein Gewähr auf <b>Richtigkeit</b> oder <b>Vollständigkeit</b>. Überprüft vor der \
+         Nutzung bitte die offiziellen FH-Kiel-Pläne.</h4>
 <div>
 <ul>"
     )?;
@@ -400,8 +405,8 @@ fn main() -> Result<()> {
         "</ul>
 </div>
 <footer>
-<p>Quelle: <a href=\"https://fh-kalender.de/\">https://fh-kalender.de/</a></p>
-<p>Generiert am: {}</p>
+<p>Quelle: <a href=\"https://fh-kalender.de/\">https://fh-kalender.de/</a></p><p>Generiert \
+         am: {}</p>
 </footer>
 </body>
 </html>",
