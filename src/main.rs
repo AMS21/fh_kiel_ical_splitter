@@ -1,15 +1,27 @@
 mod error;
 mod prelude;
 
-use std::{collections::BTreeMap, io::Write, sync::LazyLock};
+use std::{
+    collections::{BTreeMap, btree_map::Entry},
+    fs::{create_dir_all, read_to_string, write},
+    io::Write,
+    path::Path,
+    sync::LazyLock,
+    thread::sleep,
+    time::Duration,
+};
 
+use chrono::Local;
 use const_format::formatcp;
 use ical::{
+    IcalParser,
     generator::{Emitter, IcalCalendarBuilder},
     parser::ical::component::IcalEvent,
 };
 use regex::{Regex, RegexBuilder};
-use tracing::debug;
+use reqwest::blocking::Client;
+use tracing::{debug, subscriber::set_global_default};
+use tracing_subscriber::FmtSubscriber;
 
 use crate::prelude::*;
 
@@ -25,10 +37,10 @@ const CALENDAR_BASE_URL: &str = "https://fh-kalender.de/";
 const CACHE_FOLDER: &str = ".cache";
 
 // 1 request every 5 second
-const DOWNLOAD_DELAY: std::time::Duration = std::time::Duration::from_secs(5);
+const DOWNLOAD_DELAY: Duration = Duration::from_secs(5);
 
 // How long to wait before retrying a download
-const DOWNLOAD_RETRY_DELAY: std::time::Duration = std::time::Duration::from_secs(30);
+const DOWNLOAD_RETRY_DELAY: Duration = Duration::from_secs(30);
 
 // How often to retry a download before failing
 const MAX_RETRIES: usize = 10;
@@ -41,15 +53,15 @@ struct CalendarEntry {
     pub institute: String,
 }
 
-fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> {
-    let cache_folder = std::path::Path::new(CACHE_FOLDER);
+fn get_website(client: &Client, url: &str) -> Result<String> {
+    let cache_folder = Path::new(CACHE_FOLDER);
     debug_assert!(cache_folder.exists(), "Cache folder does not exist!");
 
-    let cache_file = std::path::Path::new(CACHE_FOLDER).join(url.replace('/', "_"));
+    let cache_file = Path::new(CACHE_FOLDER).join(url.replace('/', "_"));
 
     // Check if the cache file exists and load content from disk if it does
     if cache_file.exists() {
-        return Ok(std::fs::read_to_string(cache_file)?);
+        return Ok(read_to_string(cache_file)?);
     }
 
     // If the cache file doesn't exist, actually send a request and cache it
@@ -70,11 +82,11 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
             DOWNLOAD_RETRY_DELAY.as_secs()
         );
         if try_count == MAX_RETRIES - 1 {
-            return Err(error::Error::RequestFailed(response.status()));
+            return Err(Error::RequestFailed(response.status()));
         }
 
         // Wait before retrying the download
-        std::thread::sleep(DOWNLOAD_RETRY_DELAY);
+        sleep(DOWNLOAD_RETRY_DELAY);
 
         // Send next request
         response = client.get(url).send()?;
@@ -84,14 +96,14 @@ fn get_website(client: &reqwest::blocking::Client, url: &str) -> Result<String> 
     let response_body = response.text()?;
     if response_body.is_empty() {
         error!("Response body is empty");
-        return Err(error::Error::EmptyResponse);
+        return Err(Error::EmptyResponse);
     }
 
     // Cache the response
-    std::fs::write(cache_file, &response_body)?;
+    write(cache_file, &response_body)?;
 
     // Wait a bit to not spam the server when downloading
-    std::thread::sleep(DOWNLOAD_DELAY);
+    sleep(DOWNLOAD_DELAY);
 
     Ok(response_body)
 }
@@ -108,7 +120,7 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 
     let captures = URL_COMPONENTS_EXTRACT_REGEX
         .captures(url)
-        .ok_or(error::Error::InvalidUrl(url.to_owned()))?;
+        .ok_or(Error::InvalidUrl(url.to_owned()))?;
 
     let department = captures.get(1).unwrap().as_str();
     let year = captures.get(2).unwrap().as_str();
@@ -205,14 +217,14 @@ const IGNORED_EVENT_NAMES: [&str; 15] = [
 #[expect(clippy::too_many_lines)]
 fn main() -> Result<()> {
     // Initialize tracing
-    let subscriber = tracing_subscriber::FmtSubscriber::new();
-    tracing::subscriber::set_global_default(subscriber)?;
+    let subscriber = FmtSubscriber::new();
+    set_global_default(subscriber)?;
 
     // Ensure cache directory exists
-    std::fs::create_dir_all(CACHE_FOLDER)?;
+    create_dir_all(CACHE_FOLDER)?;
 
     // Build our blocking client
-    let client = reqwest::blocking::Client::builder()
+    let client = Client::builder()
         .user_agent(CLIENT_USER_AGENT)
         .https_only(true)
         .build()?;
@@ -265,7 +277,7 @@ fn main() -> Result<()> {
                 continue;
             };
 
-            let ical_reader = ical::IcalParser::new(ics_file.as_bytes());
+            let ical_reader = IcalParser::new(ics_file.as_bytes());
 
             // Print all events
             for calendar in ical_reader {
@@ -297,9 +309,7 @@ fn main() -> Result<()> {
                             }
 
                             // Append to map
-                            if let std::collections::btree_map::Entry::Vacant(e) =
-                                map.entry(name.clone())
-                            {
+                            if let Entry::Vacant(e) = map.entry(name.clone()) {
                                 // Create new map entry for this course
                                 e.insert(CalendarEntry {
                                     events: vec![event],
@@ -376,7 +386,7 @@ fn main() -> Result<()> {
             "files/{}/{}/{}",
             entries.year, entries.department, entries.institute
         );
-        std::fs::create_dir_all(&directory_path)?;
+        create_dir_all(&directory_path)?;
 
         // Write to file
         let file_name = format!(
@@ -384,7 +394,7 @@ fn main() -> Result<()> {
             directory_path,
             module.replace(['/', ' ', '-'], "_")
         );
-        std::fs::write(&file_name, calendar.generate())?;
+        write(&file_name, calendar.generate())?;
 
         // Create link in html file
         #[cfg(feature = "github_pages")]
@@ -415,7 +425,7 @@ fn main() -> Result<()> {
 </footer>
 </body>
 </html>",
-        chrono::Local::now().format("%d.%m.%Y %H:%M:%S")
+        Local::now().format("%d.%m.%Y %H:%M:%S")
     )?;
 
     info!(
