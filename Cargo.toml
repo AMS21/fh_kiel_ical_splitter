@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "Unlicense"
+repository = "https://github.com/AMS21/fh_kiel_ical_splitter"
+readme = "README.md"
 
 [dependencies]
 ical = { version = "0.11.0", features = [
