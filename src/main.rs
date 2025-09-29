@@ -3,6 +3,7 @@ mod prelude;
 
 use std::{collections::BTreeMap, io::Write, sync::LazyLock};
 
+use const_format::formatcp;
 use ical::{
     generator::{Emitter, IcalCalendarBuilder},
     parser::ical::component::IcalEvent,
@@ -12,8 +13,12 @@ use tracing::debug;
 
 use crate::prelude::*;
 
-const CLIENT_USER_AGENT: &str =
-    "fh_kiel_ical_splitter/0.1.0 (https://github.com/AMS21/fh_kiel_ical_splitter)";
+const CLIENT_USER_AGENT: &str = formatcp!(
+    "{}/{} ({})",
+    env!("CARGO_PKG_NAME"),
+    env!("CARGO_PKG_VERSION"),
+    env!("CARGO_PKG_REPOSITORY")
+);
 
 const CALENDAR_BASE_URL: &str = "https://fh-kalender.de/";
 
