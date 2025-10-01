@@ -196,22 +196,14 @@ const PROPERTY_NAME_SUMMARY: &str = "SUMMARY";
 const PROPERTY_NAME_DTSTART: &str = "DTSTART";
 const PROPERTY_NAME_DTEND: &str = "DTEND";
 
-const IGNORED_EVENT_NAMES: [&str; 15] = [
+const IGNORED_EVENT_NAMES: [&str; 7] = [
     "Christi Himmelfahrt",
-    "Erstsemester",
     "Feiertag",
-    "Induction Seminar",
     "Jobmesse",
     "Karfreitag",
-    "Kick-off",
-    "Kick-Off",
     "Markt der Möglichkeiten",
-    "Masterbegrüßung",
-    "Modulvorstellung",
     "Ostermontag",
     "Pfingstmontag",
-    "Schwerpunktswahl",
-    "Vertiefungswahl",
 ];
 
 #[expect(clippy::too_many_lines)]
