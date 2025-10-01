@@ -249,7 +249,7 @@ fn main() -> Result<()> {
             continue;
         };
 
-        // Iterate through all ics links on the insititutes page
+        // Iterate through all ics links on the institutes page
         for (_, [link]) in ics_link_regex
             .captures_iter(institute_page.as_str())
             .map(|c| c.extract())
