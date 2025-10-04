@@ -295,8 +295,10 @@ fn main() -> Result<()> {
                             let name = summary_property.value.as_ref().unwrap();
 
                             // Ignore ignored event names
-                            if IGNORED_EVENT_NAMES.binary_search(&name.as_str()).is_ok() {
-                                debug!("Ignoring event: '{name}'");
+                            if IGNORED_EVENT_NAMES.iter().any(|&ignored_event_name| {
+                                name.eq_ignore_ascii_case(ignored_event_name)
+                            }) {
+                                debug!("Ignoring event with name '{name}'");
                                 continue;
                             }
 
