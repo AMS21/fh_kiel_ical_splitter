@@ -12,7 +12,7 @@ ical = { version = "0.11.0", features = [
     "ical",
     "generator",
 ], default-features = false }
-regex = { version = "1.11.3", features = [
+regex = { version = "1.12.1", features = [
     "std",
     "perf",
     "unicode",
