@@ -17,7 +17,7 @@ regex = { version = "1.12.1", features = [
     "perf",
     "unicode",
 ], default-features = false }
-reqwest = { version = "0.12.23", features = [
+reqwest = { version = "0.12.24", features = [
     "blocking",
     "rustls-tls",
 ], default-features = false }
