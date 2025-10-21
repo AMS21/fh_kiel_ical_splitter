@@ -196,14 +196,15 @@ const PROPERTY_NAME_SUMMARY: &str = "SUMMARY";
 const PROPERTY_NAME_DTSTART: &str = "DTSTART";
 const PROPERTY_NAME_DTEND: &str = "DTEND";
 
+// NOTE: These should be lowercase
 const IGNORED_EVENT_NAMES: [&str; 7] = [
-    "Christi Himmelfahrt",
-    "Feiertag",
-    "Jobmesse",
-    "Karfreitag",
-    "Markt der Möglichkeiten",
-    "Ostermontag",
-    "Pfingstmontag",
+    "christi himmelfahrt",
+    "feiertag",
+    "jobmesse",
+    "karfreitag",
+    "markt der möglichkeiten",
+    "ostermontag",
+    "pfingstmontag",
 ];
 
 #[expect(clippy::too_many_lines)]
@@ -296,7 +297,7 @@ fn main() -> Result<()> {
 
                             // Ignore ignored event names
                             if IGNORED_EVENT_NAMES.iter().any(|&ignored_event_name| {
-                                name.eq_ignore_ascii_case(ignored_event_name)
+                                name.to_lowercase().contains(ignored_event_name)
                             }) {
                                 debug!("Ignoring event with name '{name}'");
                                 continue;
