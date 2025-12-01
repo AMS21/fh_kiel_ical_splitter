@@ -21,7 +21,7 @@ reqwest = { version = "0.12.24", features = [
     "blocking",
     "rustls-tls",
 ], default-features = false }
-tracing-subscriber = { version = "0.3.20", features = [
+tracing-subscriber = { version = "0.3.22", features = [
     "std",
     "ansi",
     "fmt",
