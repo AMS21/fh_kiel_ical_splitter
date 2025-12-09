@@ -9,35 +9,23 @@ readme = "README.md"
 
 [dependencies]
 ical = { version = "0.11.0", features = [
-    "ical",
     "generator",
 ], default-features = false }
-regex = { version = "1.12.2", features = [
-    "std",
-    "perf",
-    "unicode",
-], default-features = false }
+regex = "1.12.2"
 reqwest = { version = "0.12.25", features = [
     "blocking",
     "rustls-tls",
 ], default-features = false }
 tracing-subscriber = { version = "0.3.22", features = [
-    "std",
     "ansi",
     "fmt",
 ], default-features = false }
 tracing = { version = "0.1.43", features = [
-    "std",
     "max_level_trace",
     "release_max_level_info",
 ], default-features = false }
-chrono = { version = "0.4.42", features = [
-    "clock",
-    "now",
-], default-features = false }
-const_format = { version = "0.2.35", features = [
-    "fmt",
-], default-features = false }
+chrono = { version = "0.4.42", features = ["clock"], default-features = false }
+const_format = "0.2.35"
 
 [profile.release]
 codegen-units = 1
