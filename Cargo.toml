@@ -20,7 +20,7 @@ tracing-subscriber = { version = "0.3.22", features = [
     "ansi",
     "fmt",
 ], default-features = false }
-tracing = { version = "0.1.43", features = [
+tracing = { version = "0.1.44", features = [
     "max_level_trace",
     "release_max_level_info",
 ], default-features = false }
