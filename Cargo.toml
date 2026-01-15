@@ -24,7 +24,7 @@ tracing = { version = "0.1.44", features = [
     "max_level_trace",
     "release_max_level_info",
 ], default-features = false }
-chrono = { version = "0.4.42", features = ["clock"], default-features = false }
+chrono = { version = "0.4.43", features = ["clock"], default-features = false }
 const_format = "0.2.35"
 
 [profile.release]
