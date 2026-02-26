@@ -136,10 +136,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: Install cargo-udeps
+    - name: Install cargo-features-manager
       uses: taiki-e/install-action@v2
       with:
-        tool: cargo-feature
+        tool: cargo-features-manager
 
     - name: Check for unused features
       run: cargo features prune --no-tmp
