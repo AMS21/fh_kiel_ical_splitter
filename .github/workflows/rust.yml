@@ -113,3 +113,33 @@ jobs:
       env:
         RUSTDOCFLAGS: -D warnings
       run: cargo doc --workspace --all-features --no-deps --document-private-items
+
+  unused-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Install cargo-shear
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-shear
+
+    - name: Check for unused dependencies
+      run: cargo shear
+
+  unused-features:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Install cargo-udeps
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-feature
+
+    - name: Check for unused features
+      run: cargo features prune --no-tmp

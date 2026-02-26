@@ -37,3 +37,17 @@ jobs:
           echo 'You can find typos here: https://crates.io/crates/typos'
           echo 'if you use VSCode, you can also install `Typos Spell Checker'
           echo 'You can find the extension here: https://marketplace.visualstudio.com/items?itemName=tekumara.typos-vscode'
+
+  sort-toml:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-sort
+
+      - name: Sort Cargo.toml
+        run: cargo sort --workspace --check
