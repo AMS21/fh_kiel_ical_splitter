@@ -14,7 +14,7 @@ github_pages = []
 chrono = { version = "0.4.45", features = ["clock"], default-features = false }
 const_format = "0.2.36"
 ical = { version = "0.11.0", features = ["generator"], default-features = false }
-regex = "1.12.3"
+regex = "1.12.4"
 reqwest = { version = "0.13.4", features = ["blocking", "rustls"], default-features = false }
 tracing = { version = "0.1.44", features = ["max_level_trace", "release_max_level_info"], default-features = false }
 tracing-subscriber = { version = "0.3.23", features = ["ansi"], default-features = false }
