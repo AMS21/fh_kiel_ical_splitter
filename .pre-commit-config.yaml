@@ -1,0 +1,87 @@
+repos:
+  # General quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: trailing-whitespace
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.48.0
+    hooks:
+      - id: typos
+        stages: [pre-commit]
+
+  - repo: https://github.com/betterleaks/betterleaks
+    rev: v1.7.0
+    hooks:
+      - id: betterleaks
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  # Rust-specific checks using system cargo commands
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        description: Format Rust code automatically.
+        entry: cargo +nightly fmt --all --check
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: cargo-clippy
+        name: cargo clippy
+        description: Catch common Rust mistakes and enforce linter rules.
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: cargo-test
+        name: cargo test
+        description: Run project test suite.
+        entry: cargo test
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: cargo-sort
+        name: cargo sort
+        description: Check that Cargo.toml dependencies are sorted alphabetically.
+        entry: cargo sort --check --workspace
+        language: system
+        types: [toml]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: cargo-shear
+        name: cargo shear
+        description: Check for unused dependencies
+        entry: cargo shear --deny-warnings
+        language: system
+        types: [toml]
+        pass_filenames: false
+        stages: [pre-commit]

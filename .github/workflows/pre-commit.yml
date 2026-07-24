@@ -1,10 +1,9 @@
-name: StyleCheck
+name: Pre-Commit Checks
 
 on:
-  pull_request:
-    branches: ["*"]
   push:
-    branches: ["main", "develop"]
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -13,32 +12,19 @@ concurrency:
   group: ${{ github.ref == 'refs/heads/main' && format('ci-main-{0}', github.sha) || format('ci-{0}', github.ref) }}-${{github.workflow }}
   cancel-in-progress: true
 
-env:
-  CARGO_TERM_COLOR: always
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
-
 jobs:
-  typos:
-    runs-on: ubuntu-latest
-
+  pre-commit:
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Check for typos
-        uses: crate-ci/typos@v1
-
-  sort-toml:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - uses: taiki-e/install-action@v2
+      - name: Set up Python
+        uses: actions/setup-python@v7
         with:
-          tool: cargo-sort
+          python-version: "3.x"
 
-      - name: Sort Cargo.toml
-        run: cargo sort --workspace --check
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files --hook-stage manual
