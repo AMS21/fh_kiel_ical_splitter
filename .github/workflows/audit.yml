@@ -5,18 +5,18 @@ on:
     branches: ["*"]
     paths:
       # Workflow file itself
-      - '.github/workflows/audit.yml'
+      - ".github/workflows/audit.yml"
       # Cargo files
-      - '**/Cargo.lock'
-      - '**/Cargo.toml'
+      - "**/Cargo.lock"
+      - "**/Cargo.toml"
   push:
     branches: ["main", "develop"]
     paths:
       # Workflow file itself
-      - '.github/workflows/audit.yml'
+      - ".github/workflows/audit.yml"
       # Cargo files
-      - '**/Cargo.lock'
-      - '**/Cargo.toml'
+      - "**/Cargo.lock"
+      - "**/Cargo.toml"
   workflow_dispatch:
 
 concurrency:
@@ -27,26 +27,27 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
 
 jobs:
   audit:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
-    - name: Audit Rust Dependencies
-      uses: actions-rust-lang/audit@v1
+      - name: Audit Rust Dependencies
+        uses: actions-rust-lang/audit@v1
 
   cargo-deny:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
-    - uses: EmbarkStudios/cargo-deny-action@v2
-      with:
-        rust-version: stable
-        command: check bans licenses sources
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          rust-version: stable
+          command: check bans licenses sources
