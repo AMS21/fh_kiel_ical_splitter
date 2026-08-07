@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - uses: taiki-e/install-action@v2.85.7
+      - uses: taiki-e/install-action@v2.85.8
         with:
           tool: cargo-sort
 
