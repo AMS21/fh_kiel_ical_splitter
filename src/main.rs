@@ -19,7 +19,7 @@ use ical::{
     parser::ical::component::IcalEvent,
 };
 use regex::{Regex, RegexBuilder};
-use reqwest::blocking::Client;
+use reqwest::{StatusCode, blocking::Client};
 use tracing::{debug, subscriber::set_global_default};
 use tracing_subscriber::FmtSubscriber;
 
@@ -71,6 +71,17 @@ fn get_website(client: &Client, url: &str) -> Result<String> {
         // Check if the request was successful
         if response.status().is_success() {
             break;
+        }
+
+        // Handle 404 not found error directly as retrying won't help in this
+        // case
+        if response.status() == StatusCode::NOT_FOUND {
+            warn!(
+                "Request for '{url}' failed with status: {}, not retrying",
+                response.status()
+            );
+
+            return Err(Error::RequestFailed(response.status()));
         }
 
         warn!(
@@ -266,7 +277,7 @@ fn main() -> Result<()> {
             // Download the calendar file
             let url = CALENDAR_BASE_URL.to_owned() + link;
             let Ok(ics_file) = get_website(&client, &url) else {
-                error!("Failed to download ics file '{url}' after {MAX_RETRIES} retries, skipping");
+                error!("Failed to download ics file '{url}', skipping");
                 continue;
             };
 
