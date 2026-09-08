@@ -130,9 +130,9 @@ fn extract_components_from_url(url: &str) -> Result<(String, String, String)> {
 }
 
 fn extract_department_links_from_website(website_source: &str) -> Vec<String> {
-    // Sample: <a href="/informatik-elektrotechnik" role="button" class="contrast"
-    // style="display: grid; place-items: center; margin-bottom: 1rem;"> Informatik
-    // und Elektrotechnik </a>
+    // Sample: <a href="/informatik-elektrotechnik" role="button"
+    // class="contrast" style="display: grid; place-items: center;
+    // margin-bottom: 1rem;"> Informatik und Elektrotechnik </a>
     static DEPARTMENT_LINK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
         RegexBuilder::new("<a href=\"/([a-zA-Z-]+?)\" role=\"button\"")
             .case_insensitive(true)
