@@ -473,6 +473,16 @@ fn main() -> Result<()> {
                 "-//Veranstaltungsplan der FH Kiel//{}//{}//{}//{}//",
                 entries.year, entries.department, entries.institute, module
             ))
+            .set(ical_property!("METHOD", "PUBLISH"))
+            .set(ical_property!("NAME", module.clone()))
+            .set(ical_property!("X-WR-CALNAME", module.clone()))
+            .set(ical_property!("X-PUBLISHED-TTL", "P1D"))
+            .set(ical_property!(
+                "REFRESH-INTERVAL",
+                "P1D",
+                ("VALUE".into(), vec!["DURATION".into()])
+            ))
+            .set(ical_property!("X-WR-TIMEZONE", CALENDAR_TIMEZONE))
             .build();
 
         // Add the specific events
