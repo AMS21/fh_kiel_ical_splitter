@@ -59,12 +59,13 @@ struct CalendarEntry {
     pub institute: String,
 }
 
-/// Sanitizes a filename to be compatible with most filesystems by replacing
-/// non-alphanumeric characters with underscores.
+/// Sanitizes a filename to be compatible with most filesystems.
 fn sanitize_filename(url: &str) -> String {
     url.chars()
         .map(|c| {
-            if c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-') {
+            if c.is_ascii_alphanumeric()
+                || matches!(c, '.' | '_' | '-' | 'ä' | 'ö' | 'ü' | 'Ä' | 'Ö' | 'Ü' | 'ß')
+            {
                 c
             } else {
                 '_'
