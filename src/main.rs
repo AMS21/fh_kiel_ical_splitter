@@ -16,7 +16,11 @@ use const_format::formatcp;
 use ical::{
     IcalParser,
     generator::{Emitter, IcalCalendarBuilder},
-    parser::ical::component::IcalEvent,
+    ical_property,
+    parser::ical::component::{
+        IcalEvent, IcalTimeZone, IcalTimeZoneTransition, IcalTimeZoneTransitionType,
+    },
+    property::Property,
 };
 use regex::{Regex, RegexBuilder};
 use reqwest::{StatusCode, blocking::Client};
@@ -33,6 +37,8 @@ const CLIENT_USER_AGENT: &str = formatcp!(
 );
 
 const CALENDAR_BASE_URL: &str = "https://fh-kalender.de/";
+
+const CALENDAR_TIMEZONE: &str = "Europe/Berlin";
 
 const CACHE_FOLDER: &str = ".cache";
 
@@ -232,6 +238,78 @@ const IGNORED_EVENT_NAMES: [&str; 7] = [
     "pfingstmontag",
 ];
 
+// The source calendars only contain floating times (e.g.
+// DTSTART:20260903T083000) without any timezone information, which some
+// calendar clients would otherwise interpret as UTC. Since the plans are for
+// lectures at HAW Kiel, interpret them as Europe/Berlin local time instead.
+fn decorate_with_timezone(property: &mut Property, tzid: &str) {
+    if property
+        .value
+        .as_deref()
+        .is_none_or(|value| value.len() != 15 || value.ends_with('Z'))
+    {
+        // DATE-only or already UTC
+        return;
+    }
+
+    if property
+        .params
+        .as_ref()
+        .is_some_and(|params| params.iter().any(|(name, _)| name == "TZID"))
+    {
+        return;
+    }
+
+    property
+        .params
+        .get_or_insert_with(Vec::new)
+        .push(("TZID".into(), vec![tzid.to_owned()]));
+}
+
+fn build_berlin_timezone() -> IcalTimeZone {
+    let mut timezone = IcalTimeZone::new();
+    timezone
+        .properties
+        .push(ical_property!("TZID", CALENDAR_TIMEZONE));
+    timezone
+        .properties
+        .push(ical_property!("X-LIC-LOCATION", CALENDAR_TIMEZONE));
+
+    let mut standard = IcalTimeZoneTransition::new(IcalTimeZoneTransitionType::STANDARD);
+    standard
+        .properties
+        .push(ical_property!("DTSTART", "19701025T030000"));
+    standard
+        .properties
+        .push(ical_property!("RRULE", "FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU"));
+    standard.properties.push(ical_property!("TZNAME", "CET"));
+    standard
+        .properties
+        .push(ical_property!("TZOFFSETFROM", "+0200"));
+    standard
+        .properties
+        .push(ical_property!("TZOFFSETTO", "+0100"));
+    timezone.transitions.push(standard);
+
+    let mut daylight = IcalTimeZoneTransition::new(IcalTimeZoneTransitionType::DAYLIGHT);
+    daylight
+        .properties
+        .push(ical_property!("DTSTART", "19700329T020000"));
+    daylight
+        .properties
+        .push(ical_property!("RRULE", "FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU"));
+    daylight.properties.push(ical_property!("TZNAME", "CEST"));
+    daylight
+        .properties
+        .push(ical_property!("TZOFFSETFROM", "+0100"));
+    daylight
+        .properties
+        .push(ical_property!("TZOFFSETTO", "+0200"));
+    timezone.transitions.push(daylight);
+
+    timezone
+}
+
 #[expect(clippy::too_many_lines)]
 fn main() -> Result<()> {
     // Initialize tracing
@@ -397,9 +475,19 @@ fn main() -> Result<()> {
             .build();
 
         // Add the specific events
-        for entry in entries.events {
+        for mut entry in entries.events {
+            for property in entry
+                .properties
+                .iter_mut()
+                .filter(|p| p.name == PROPERTY_NAME_DTSTART || p.name == PROPERTY_NAME_DTEND)
+            {
+                decorate_with_timezone(property, CALENDAR_TIMEZONE);
+            }
             calendar.events.push(entry);
         }
+
+        // Add the timezone definition referenced by the events
+        calendar.timezones.push(build_berlin_timezone());
 
         // Create folder
         let directory_path = format!(
