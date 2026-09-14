@@ -53,11 +53,25 @@ struct CalendarEntry {
     pub institute: String,
 }
 
+/// Sanitizes a filename to be compatible with most filesystems by replacing
+/// non-alphanumeric characters with underscores.
+fn sanitize_filename(url: &str) -> String {
+    url.chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-') {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect()
+}
+
 fn get_website(client: &Client, url: &str) -> Result<String> {
     let cache_folder = Path::new(CACHE_FOLDER);
     debug_assert!(cache_folder.exists(), "Cache folder does not exist!");
 
-    let cache_file = Path::new(CACHE_FOLDER).join(url.replace('/', "_"));
+    let cache_file = Path::new(CACHE_FOLDER).join(sanitize_filename(url));
 
     // Check if the cache file exists and load content from disk if it does
     if cache_file.exists() {
@@ -395,11 +409,7 @@ fn main() -> Result<()> {
         create_dir_all(&directory_path)?;
 
         // Write to file
-        let file_name = format!(
-            "{}/{}.ics",
-            directory_path,
-            module.replace(['/', ' ', '-'], "_")
-        );
+        let file_name = format!("{}/{}.ics", directory_path, sanitize_filename(&module));
         write(&file_name, calendar.generate())?;
 
         // Create link in html file
