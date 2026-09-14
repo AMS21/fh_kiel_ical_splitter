@@ -13,11 +13,21 @@ github_pages = []
 [dependencies]
 chrono = { version = "0.4.45", features = ["clock"], default-features = false }
 const_format = "0.2.36"
-ical = { version = "0.11.0", features = ["generator"], default-features = false }
+ical = { version = "0.11.0", features = [
+  "generator",
+], default-features = false }
 regex = "1.13.1"
-reqwest = { version = "0.13.4", features = ["blocking", "rustls"], default-features = false }
-tracing = { version = "0.1.44", features = ["max_level_trace", "release_max_level_info"], default-features = false }
-tracing-subscriber = { version = "0.3.23", features = ["ansi"], default-features = false }
+reqwest = { version = "0.13.4", features = [
+  "blocking",
+  "rustls",
+], default-features = false }
+tracing = { version = "0.1.44", features = [
+  "max_level_trace",
+  "release_max_level_info",
+], default-features = false }
+tracing-subscriber = { version = "0.3.23", features = [
+  "ansi",
+], default-features = false }
 
 [profile.release]
 codegen-units = 1
@@ -65,7 +75,6 @@ redundant_type_annotations = "warn"
 rest_pat_in_fully_bound_structs = "warn"
 str_to_string = "warn"
 string_lit_chars_any = "warn"
-string_to_string = "warn"
 try_err = "warn"
 undocumented_unsafe_blocks = "warn"
 unnecessary_safety_comment = "warn"
