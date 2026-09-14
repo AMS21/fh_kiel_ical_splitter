@@ -1,11 +1,10 @@
 [package]
-name = "fh_kiel_ical_splitter"
+name = "fh-kiel-ical-splitter"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "Unlicense"
 repository = "https://github.com/AMS21/fh_kiel_ical_splitter"
-readme = "README.md"
 
 [features]
 github_pages = []
