@@ -18,5 +18,5 @@ updates:
   - package-ecosystem: nix
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
       time: "04:00"
