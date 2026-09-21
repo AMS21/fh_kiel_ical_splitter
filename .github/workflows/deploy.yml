@@ -20,6 +20,10 @@ jobs:
       CARGO_TERM_COLOR: always
       RUST_BACKTRACE: full
 
+    permissions:
+      contents: read
+      pages: write
+
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -56,6 +60,7 @@ jobs:
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
+      contents: read
       pages: write # to deploy to Pages
       id-token: write # to verify the deployment originates from an appropriate source
 
