@@ -29,6 +29,9 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: full
 
+permissions:
+  contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-latest
