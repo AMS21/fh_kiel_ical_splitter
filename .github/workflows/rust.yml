@@ -93,7 +93,7 @@ jobs:
         toolchain:
           - "nightly"
           - "stable"
-          - "1.85" # MSRV
+          - "1.87" # MSRV
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
